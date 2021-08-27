@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DotWikiApi.Authentication;
@@ -7,6 +8,11 @@ namespace DotWikiApi.Models
 {
     public class Article
     {
+        public Article()
+        {
+            Snapshots = new HashSet<Snapshot>();
+        }
+        
         [Key]
         public int Id { get; set; }
         [Required]
@@ -20,5 +26,7 @@ namespace DotWikiApi.Models
         
         public int ApplicationUserId { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
+        
+        public virtual ICollection<Snapshot> Snapshots { get; set; }
     }
 }
