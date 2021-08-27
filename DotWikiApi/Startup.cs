@@ -1,8 +1,11 @@
 using System.Text;
+using DotWikiApi.Authentication;
 using DotWikiApi.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +28,11 @@ namespace DotWikiApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // For Identity
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<DotWikiContext>()  
+                .AddDefaultTokenProviders();
             var builder = new NpgsqlConnectionStringBuilder
             {
                 ConnectionString = Configuration.GetConnectionString("DefaultConnection"),
