@@ -15,6 +15,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.12.2" />
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.12.2" />
@@ -22,7 +23,6 @@
 
     <ItemGroup>
       <Folder Include="Controllers" />
-      <Folder Include="Profiles" />
     </ItemGroup>
 
 </Project>
