@@ -24,9 +24,8 @@ namespace DotWikiApi.Models
         [Required]
         public DateTime CreatedAt { get; set; }
         
-        public int ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
-        
         public virtual ICollection<Snapshot> Snapshots { get; set; }
     }
 }
