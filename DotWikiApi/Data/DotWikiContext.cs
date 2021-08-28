@@ -11,6 +11,15 @@ namespace DotWikiApi.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.Entity<Article>()
+                .HasMany(a => a.Snapshots)
+                .WithOne(s => s.Article)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
         public DbSet<Article> Articles { get; set; }
         public DbSet<Snapshot> Snapshots { get; set; }
     }
