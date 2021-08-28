@@ -90,10 +90,7 @@ namespace DotWikiApi.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("ApplicationUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ApplicationUserId1")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("text");
 
                     b.Property<string>("Content")
@@ -110,7 +107,7 @@ namespace DotWikiApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId1");
+                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Articles");
                 });
@@ -122,10 +119,7 @@ namespace DotWikiApi.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("ApplicationUserId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ApplicationUserId1")
+                    b.Property<string>("ApplicationUserId")
                         .HasColumnType("text");
 
                     b.Property<int>("ArticleId")
@@ -145,7 +139,7 @@ namespace DotWikiApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId1");
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("ArticleId");
 
@@ -286,7 +280,7 @@ namespace DotWikiApi.Migrations
                 {
                     b.HasOne("DotWikiApi.Authentication.ApplicationUser", "ApplicationUser")
                         .WithMany("Articles")
-                        .HasForeignKey("ApplicationUserId1");
+                        .HasForeignKey("ApplicationUserId");
 
                     b.Navigation("ApplicationUser");
                 });
@@ -295,10 +289,10 @@ namespace DotWikiApi.Migrations
                 {
                     b.HasOne("DotWikiApi.Authentication.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ApplicationUserId1");
+                        .HasForeignKey("ApplicationUserId");
 
                     b.HasOne("DotWikiApi.Models.Article", "Article")
-                        .WithMany()
+                        .WithMany("Snapshots")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -362,6 +356,11 @@ namespace DotWikiApi.Migrations
             modelBuilder.Entity("DotWikiApi.Authentication.ApplicationUser", b =>
                 {
                     b.Navigation("Articles");
+                });
+
+            modelBuilder.Entity("DotWikiApi.Models.Article", b =>
+                {
+                    b.Navigation("Snapshots");
                 });
 #pragma warning restore 612, 618
         }
