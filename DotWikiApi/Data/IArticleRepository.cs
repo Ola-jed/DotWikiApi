@@ -7,7 +7,7 @@ namespace DotWikiApi.Data
 {
     public interface IArticleRepository
     {
-        Task<bool> SaveChanges();
+        Task SaveChanges();
         Task<IEnumerable<Article>> GetAllArticles();
         Task<List<Article>> SearchArticles(string title);
         Task<Article> GetArticle(int id);
