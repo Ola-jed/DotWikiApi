@@ -10,9 +10,7 @@ namespace DotWikiApi.Data
         Task<bool> SaveChanges();
         Task<IEnumerable<Article>> GetAllArticles();
         Task<List<Article>> SearchArticles(string title);
-        Task<Article> GetArticleById(int id);
-
-        Task<Article> GetArticleWithSnapshots(int id);
+        Task<Article> GetArticle(int id);
         Task CreateArticle(Article article);
         void UpdateArticle(Article article);
         void DeleteArticle(Article article);

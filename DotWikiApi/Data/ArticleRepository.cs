@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotWikiApi.Authentication;
 using DotWikiApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,17 +35,12 @@ namespace DotWikiApi.Data
                 .ToListAsync();
         }
 
-        public async Task<Article> GetArticleById(int id)
+        public Task<Article> GetArticle(int id)
         {
-            return await _context.Articles.FirstOrDefaultAsync(article => article.Id == id);
-        }
-
-        public async Task<Article> GetArticleWithSnapshots(int id)
-        {
-            return await _context
+            return _context
                 .Articles
-                .Include(article => article.Snapshots)
-                .ThenInclude(snapshot => snapshot.ApplicationUser)
+                .Include(a => a.Snapshots)
+                .Include(a => a.ApplicationUser)
                 .FirstOrDefaultAsync(article => article.Id == id);
         }
 
