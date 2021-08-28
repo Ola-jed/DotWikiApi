@@ -9,6 +9,8 @@ namespace DotWikiApi.Profiles
         public ArticleProfile()
         {
             CreateMap<ArticleCreateDto,Article>();
+            CreateMap<ArticleUpdateDto,Article>();
+            CreateMap<Article,ArticleReadDto>();
         }
     }
 }
