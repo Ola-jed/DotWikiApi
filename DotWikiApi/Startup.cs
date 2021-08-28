@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using DotWikiApi.Authentication;
 using DotWikiApi.Data;
+using DotWikiApi.Services.Mail;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,6 +44,10 @@ namespace DotWikiApi
                 Username = Configuration["UserId"]
             };
             services.AddDbContext<DotWikiContext>(opt => opt.UseNpgsql(builder.ConnectionString));
+            var cfg = Configuration.GetSection("MailSettings");
+            cfg["MailUser"] = Configuration["MailUser"];
+            cfg["MailPassword"] = Configuration["MailPassword"];
+            services.Configure<MailSettings>(cfg);
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
