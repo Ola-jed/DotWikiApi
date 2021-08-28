@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using DotWikiApi.Authentication;
 using DotWikiApi.Data;
@@ -28,7 +29,9 @@ namespace DotWikiApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             // For Identity
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<DotWikiContext>()  
