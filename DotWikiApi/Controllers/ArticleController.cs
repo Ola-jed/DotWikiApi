@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using DotWikiApi.Authentication;
@@ -9,7 +8,6 @@ using DotWikiApi.Data;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,15 +73,27 @@ namespace DotWikiApi.Controllers
                 return NotFound();
             }
             // Create the snapshot corresponding to the current state
-
             return NoContent();
         }
 
         // DELETE: api/Article/5
         [Authorize]
         [HttpDelete("{id:int}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
+            var article = await _articleRepository.GetArticle(id);
+            if (article == null)
+            {
+                return NotFound();
+            }
+            var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            if (article.ApplicationUserId != currentUser.Id)
+            {
+                return Forbid();
+            }
+            _articleRepository.DeleteArticle(article);
+            await _articleRepository.SaveChanges();
+            return NoContent();
         }
     }
 }
