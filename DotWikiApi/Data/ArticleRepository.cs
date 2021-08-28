@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DotWikiApi.Authentication;
 using DotWikiApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,11 +14,6 @@ namespace DotWikiApi.Data
         public ArticleRepository(DotWikiContext context)
         {
             _context = context;
-        }
-        
-        public async Task<bool> SaveChanges()
-        {
-            return await _context.SaveChangesAsync() >= 0;
         }
 
         public async Task<IEnumerable<Article>> GetAllArticles()
@@ -65,6 +59,11 @@ namespace DotWikiApi.Data
                 throw new ArgumentNullException(nameof(article));
             }
             _context.Articles.Remove(article);
+        }
+        
+        public async Task SaveChanges()
+        {
+            await _context.SaveChangesAsync();
         }
     }
 }
