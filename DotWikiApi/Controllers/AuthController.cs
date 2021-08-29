@@ -7,10 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using DotWikiApi.Authentication;
 using DotWikiApi.Dtos;
+using DotWikiApi.Services.Mail;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace DotWikiApi.Controllers
@@ -22,13 +24,20 @@ namespace DotWikiApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IMailService _mailService;
+        private readonly IOptions<MailSettings> _options;
 
-        public AuthController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager,
-            IConfiguration configuration)
+        public AuthController(UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration configuration,
+            IMailService mailService,
+            IOptions<MailSettings> mailSettings)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _mailService = mailService;
+            _options = mailSettings;
         }
 
         [HttpPost]
@@ -59,7 +68,6 @@ namespace DotWikiApi.Controllers
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
-
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
@@ -85,6 +93,17 @@ namespace DotWikiApi.Controllers
                 UserName = model.Username
             };
             var result = await _userManager.CreateAsync(user, model.Password);
+            try
+            {
+                await _mailService.SendEmailAsync(new SignupMail(_options, user));
+            }
+            catch (Exception e)
+            {
+                Console.BackgroundColor = ConsoleColor.DarkGray;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(e.Message);
+            }
+
             return !result.Succeeded
                 ? StatusCode(StatusCodes.Status500InternalServerError,
                     new
