@@ -4,6 +4,6 @@ namespace DotWikiApi.Services.Mail
 {
     public interface IMailable
     {
-        MimeMessage build();
+        MimeMessage Build();
     }
 }
