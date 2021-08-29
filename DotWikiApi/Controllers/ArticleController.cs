@@ -69,8 +69,6 @@ namespace DotWikiApi.Controllers
             {
                 return NotFound();
             }
-            // Create the snapshot corresponding to the current state
-            // And then update
             var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
             var snapshot = new Snapshot
             {
