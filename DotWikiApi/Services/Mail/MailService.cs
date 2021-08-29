@@ -1,12 +1,27 @@
 using System.Threading.Tasks;
+using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.Extensions.Options;
 
 namespace DotWikiApi.Services.Mail
 {
     public class MailService: IMailService
     {
-        public Task SendEmailAsync(IMailable mailable)
+        private readonly MailSettings _settings;
+
+        public MailService(IOptions<MailSettings> settings)
         {
-            throw new System.NotImplementedException();
+            _settings = settings.Value;
+        }
+
+        public async Task SendEmailAsync(IMailable mailable)
+        {
+            var email = mailable.Build();
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync(_settings.Host,_settings.Port,SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(_settings.MailUser,_settings.MailPassword);
+            await smtp.SendAsync(email);
+            await smtp.DisconnectAsync(true);
         }
     }
 }
