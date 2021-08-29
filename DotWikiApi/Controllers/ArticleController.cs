@@ -18,17 +18,21 @@ namespace DotWikiApi.Controllers
     public class ArticleController : ControllerBase
     {
         private readonly IArticleRepository _articleRepository;
+        private readonly ISnapshotRepository _snapshotRepository;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
-        
-        public ArticleController(IArticleRepository articleRepository,IMapper mapper, UserManager<ApplicationUser> userManager)
+
+        public ArticleController(IArticleRepository articleRepository,
+            ISnapshotRepository snapshotRepository,
+            IMapper mapper,
+            UserManager<ApplicationUser> userManager)
         {
             _articleRepository = articleRepository;
+            _snapshotRepository = snapshotRepository;
             _mapper = mapper;
             _userManager = userManager;
         }
-        
-        // GET: api/Article
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable>> GetAll()
         {
@@ -36,19 +40,13 @@ namespace DotWikiApi.Controllers
             return Ok(articles);
         }
 
-        // GET: api/Article/5
         [HttpGet("{id:int}", Name = "Get")]
         public async Task<ActionResult<Article>> Get(int id)
         {
             var article = await _articleRepository.GetArticle(id);
-            if (article == null)
-            {
-                return NotFound();
-            }
-            return Ok(article);
+            return article == null ? NotFound() : Ok(article);
         }
 
-        // POST: api/Article
         [Authorize]
         [HttpPost]
         public async Task<ActionResult<ArticleReadDto>> Post(ArticleCreateDto articleCreateDto)
@@ -62,7 +60,6 @@ namespace DotWikiApi.Controllers
             return CreatedAtAction(nameof(Get),new {Id = article.Id},_mapper.Map<ArticleReadDto>(article));
         }
 
-        // PUT: api/Article/5
         [Authorize]
         [HttpPut("{id:int}")]
         public async Task<ActionResult> Put(int id, ArticleUpdateDto articleUpdateDto)
@@ -73,10 +70,24 @@ namespace DotWikiApi.Controllers
                 return NotFound();
             }
             // Create the snapshot corresponding to the current state
+            // And then update
+            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var snapshot = new Snapshot
+            {
+                Title = article.Title,
+                Content = article.Content,
+                ArticleId = article.Id,
+                CreatedAt = DateTime.Now,
+                ApplicationUserId = usr.Id,
+                ApplicationUser = usr
+            };
+            await _snapshotRepository.CreateSnapshot(snapshot);
+            _mapper.Map(articleUpdateDto, article);
+            _articleRepository.UpdateArticle(article);
+            await _articleRepository.SaveChanges();
             return NoContent();
         }
 
-        // DELETE: api/Article/5
         [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Delete(int id)
