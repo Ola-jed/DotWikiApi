@@ -33,9 +33,12 @@ namespace DotWikiApi.Data
         {
             return _context
                 .Articles
-                .Include(a => a.Snapshots)
-                .Include(a => a.ApplicationUser)
                 .FirstOrDefaultAsync(article => article.Id == id);
+        }
+
+        public Task<bool> ArticleExists(int id)
+        {
+            return _context.Articles.AnyAsync(a => a.Id == id);
         }
 
         public async Task CreateArticle(Article article)
@@ -60,7 +63,7 @@ namespace DotWikiApi.Data
             }
             _context.Articles.Remove(article);
         }
-        
+
         public async Task SaveChanges()
         {
             await _context.SaveChangesAsync();

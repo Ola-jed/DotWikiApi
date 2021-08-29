@@ -11,6 +11,7 @@ namespace DotWikiApi.Data
         Task<IEnumerable<Article>> GetAllArticles();
         Task<List<Article>> SearchArticles(string title);
         Task<Article> GetArticle(int id);
+        Task<bool> ArticleExists(int id);
         Task CreateArticle(Article article);
         void UpdateArticle(Article article);
         void DeleteArticle(Article article);
