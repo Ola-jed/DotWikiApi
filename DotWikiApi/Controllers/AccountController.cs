@@ -5,9 +5,11 @@ using DotWikiApi.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotWikiApi.Controllers
 {
+    // TODO : Account update with auth and account deletion
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -21,19 +23,37 @@ namespace DotWikiApi.Controllers
             _userManager = userManager;
         }
 
-        [Authorize]
-        [HttpGet("/me")]
-        public async Task<ActionResult> Get()
-        {
-            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
-            return Ok(_mapper.Map<UserReadDto>(usr));
-        }
-
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAccount(string id)
         {
-            var usr = await _userManager.FindByIdAsync(id);
-            return usr == null ? NotFound() : Ok(usr);
+            var usr = await _userManager
+                .Users
+                .Include(usr => usr.Articles)
+                .FirstOrDefaultAsync(usr => usr.Id == id);
+            return usr == null ? NotFound() : Ok(_mapper.Map<UserReadDto>(usr));
         }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult> Get()
+        {
+            var usr = await _userManager
+                .Users
+                .Include(usr => usr.Articles)
+                .FirstOrDefaultAsync(usr => usr.UserName == HttpContext.User.Identity.Name);
+            return Ok(_mapper.Map<UserReadDto>(usr));
+        }
+
+        [Authorize]
+        [HttpPut]
+        public async Task<ActionResult> Put(AccountUpdateDto accountUpdateDto)
+        {
+            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            usr.Email = accountUpdateDto.Email;
+            usr.UserName = accountUpdateDto.Username;
+            return NoContent();
+        }
+
+
     }
 }

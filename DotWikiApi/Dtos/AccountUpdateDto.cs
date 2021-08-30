@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DotWikiApi.Dtos
 {
-    public class RegisterDto
+    public class AccountUpdateDto
     {
         [Required(ErrorMessage = "User Name is required")]
         public string Username { get; set; }
