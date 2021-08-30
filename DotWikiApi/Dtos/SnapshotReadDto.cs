@@ -14,6 +14,8 @@ namespace DotWikiApi.Dtos
         [Column(TypeName = "text")]
         public string Content { get; set; }
         [Required]
+        public string Comment { get; set; }
+        [Required]
         public DateTime CreatedAt { get; set; }
         public int ArticleId { get; set; }
     }
