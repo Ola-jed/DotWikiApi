@@ -50,12 +50,12 @@ namespace DotWikiApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { Status = "Error", Message = "User already exists!" });
             }
-
             var user = new ApplicationUser()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username
+                UserName = model.Username,
+                RegisterDate = DateTime.Now
             };
             var result = await _userManager.CreateAsync(user, model.Password);
             try

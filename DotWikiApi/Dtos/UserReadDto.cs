@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace DotWikiApi.Dtos
@@ -8,5 +9,7 @@ namespace DotWikiApi.Dtos
         public string UserName { get; set; }
         [Required]
         public string Email { get; set; }
+        [Required]
+        public DateTime RegisterDate { get; set; }
     }
 }
