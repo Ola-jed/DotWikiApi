@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DotWikiApi.Controllers
 {
-    // TODO : Account update with auth and account deletion
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -51,9 +50,16 @@ namespace DotWikiApi.Controllers
             var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
             usr.Email = accountUpdateDto.Email;
             usr.UserName = accountUpdateDto.Username;
+            // TODO : Finish implementation
             return NoContent();
         }
 
-
+        [Authorize]
+        [HttpDelete]
+        public ActionResult Delete()
+        {
+            // TODO : Finish implementation
+            return NoContent();
+        }
     }
 }

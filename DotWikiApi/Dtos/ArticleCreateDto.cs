@@ -5,10 +5,10 @@ namespace DotWikiApi.Dtos
 {
     public class ArticleCreateDto
     {
-        [Required]
+        [Required(ErrorMessage = "Title is required")]
         [MaxLength(100)]
         public string Title { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Content is required")]
         [Column(TypeName = "text")]
         public string Content { get; set; }
     }

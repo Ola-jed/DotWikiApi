@@ -5,10 +5,10 @@ namespace DotWikiApi.Dtos
 {
     public class ArticleUpdateDto
     {
-        [Required]
+        [Required(ErrorMessage = "Content is required")]
         [Column(TypeName = "text")]
         public string Content { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Comment is required")]
         [MaxLength(100)]
         public string Comment { get; set; }
     }
