@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
+using DotWikiApi.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +15,16 @@ namespace DotWikiApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IMapper _mapper;
+        private readonly IAuthService _authService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(IMapper mapper, UserManager<ApplicationUser> userManager)
+        public AccountController(IMapper mapper,
+            UserManager<ApplicationUser> userManager,
+            IAuthService authService)
         {
             _mapper = mapper;
             _userManager = userManager;
+            _authService = authService;
         }
 
         [HttpGet("{id}")]
