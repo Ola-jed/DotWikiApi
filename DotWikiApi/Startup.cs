@@ -34,7 +34,6 @@ namespace DotWikiApi
             services.AddScoped<ISnapshotRepository, SnapshotRepository>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            // For Identity
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<DotWikiContext>()
                 .AddDefaultTokenProviders();
@@ -49,11 +48,30 @@ namespace DotWikiApi
             cfg["MailUser"] = Configuration["MailUser"];
             cfg["MailPassword"] = Configuration["MailPassword"];
             services.Configure<MailSettings>(cfg);
-            services.AddTransient<IMailService,MailService>();
+            services.AddTransient<IMailService, MailService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DotWikiApi", Version = "v1" });
+                var securitySchema = new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. (\"Authorization: Bearer {token}\")",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+                c.AddSecurityDefinition("Bearer", securitySchema);
+                var securityRequirement = new OpenApiSecurityRequirement
+                {
+                    { securitySchema, new[] { "Bearer" } }
+                };
+                c.AddSecurityRequirement(securityRequirement);
             });
             services.AddAuthentication(options =>
                 {
@@ -83,17 +101,15 @@ namespace DotWikiApi
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DotWikiApi v1"));
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "DotWikiApi v1");
+                });
             }
-
             app.UseHttpsRedirection();
-
             app.UseAuthentication();
-
             app.UseRouting();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
