@@ -7,7 +7,7 @@ namespace DotWikiApi.Data
 {
     public class DotWikiContext: IdentityDbContext<ApplicationUser>
     {
-        public DotWikiContext(DbContextOptions<DotWikiContext> options) : base(options)  
+        public DotWikiContext(DbContextOptions<DotWikiContext> options) : base(options)
         {
         }
 
@@ -16,7 +16,15 @@ namespace DotWikiApi.Data
             base.OnModelCreating(builder);
             builder.Entity<Article>()
                 .HasMany(a => a.Snapshots)
-                .WithOne(s => s.Article)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<ApplicationUser>()
+                .HasMany(a => a.Articles)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<ApplicationUser>()
+                .HasMany(a => a.Snapshots)
+                .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
         }
 
