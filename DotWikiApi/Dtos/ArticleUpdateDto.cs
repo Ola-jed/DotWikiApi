@@ -8,5 +8,8 @@ namespace DotWikiApi.Dtos
         [Required]
         [Column(TypeName = "text")]
         public string Content { get; set; }
+        [Required]
+        [MaxLength(100)]
+        public string Comment { get; set; }
     }
 }

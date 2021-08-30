@@ -16,6 +16,9 @@ namespace DotWikiApi.Models
         [Column(TypeName = "text")]
         public string Content { get; set; }
         [Required]
+        [MaxLength(100)]
+        public string Comment { get; set; }
+        [Required]
         public DateTime CreatedAt { get; set; }
         public string ApplicationUserId { get; set; }
         public int ArticleId { get; set; }
