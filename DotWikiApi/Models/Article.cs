@@ -12,7 +12,7 @@ namespace DotWikiApi.Models
         {
             Snapshots = new HashSet<Snapshot>();
         }
-        
+
         [Key]
         public int Id { get; set; }
         [Required]
@@ -23,9 +23,8 @@ namespace DotWikiApi.Models
         public string Content { get; set; }
         [Required]
         public DateTime CreatedAt { get; set; }
-        
+
         public string ApplicationUserId { get; set; }
-        public virtual ApplicationUser ApplicationUser { get; set; }
         public virtual ICollection<Snapshot> Snapshots { get; set; }
     }
 }
