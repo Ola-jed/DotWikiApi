@@ -8,8 +8,8 @@ Rest api written in ASP.NET Core for management of a wikipedia-like system
 
 [Dotnet](https://dotnet.microsoft.com/download)
 
-> Postgres is th used dbms
-> 
+> Postgres is the used dbms
+>
 > Create the database `dotwiki` in postgres and add the _**UserId**_ and _**Password**_ credentials
 
 ```shell
