@@ -89,21 +89,17 @@ namespace DotWikiApi.Controllers
             {
                 return Unauthorized();
             }
-
             var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
             {
                 new(ClaimTypes.Name, user.UserName),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
-
             authClaims.AddRange(userRoles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
-
             var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
             var token = new JwtSecurityToken(
-                _configuration["JWT:ValidIssuer"],
-                _configuration["JWT:ValidAudience"],
+                issuer: _configuration["JWT:ValidIssuer"],
+                audience:_configuration["JWT:ValidAudience"],
                 expires: DateTime.Now.AddDays(30),
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)

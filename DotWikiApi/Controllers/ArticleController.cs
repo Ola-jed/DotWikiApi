@@ -33,7 +33,7 @@ namespace DotWikiApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ArticleReadDto>>> GetAll()
+        public async Task<ActionResult> GetAll()
         {
             var articles = _mapper.Map<IEnumerable<ArticleReadDto>>(await _articleRepository.GetAllArticles());
             return Ok(articles);
