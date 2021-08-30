@@ -6,7 +6,7 @@ namespace DotWikiApi.Authentication
 {
     public class ApplicationUser: IdentityUser
     {
-        public ApplicationUser() : base()
+        public ApplicationUser()
         {
             Articles = new HashSet<Article>();
             Snapshots = new HashSet<Snapshot>();
