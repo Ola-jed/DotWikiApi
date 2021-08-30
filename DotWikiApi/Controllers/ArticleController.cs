@@ -40,21 +40,21 @@ namespace DotWikiApi.Controllers
         }
 
         [HttpGet("{id:int}", Name = "Get")]
-        public async Task<ActionResult<Article>> Get(int id)
+        public async Task<ActionResult> Get(int id)
         {
             var article = await _articleRepository.GetArticle(id);
             return article == null ? NotFound() : Ok(article);
         }
 
         [HttpGet("{id:int}/WithSnapshot")]
-        public async Task<ActionResult<Article>> GetWithSnapshots(int id)
+        public async Task<ActionResult> GetWithSnapshots(int id)
         {
             var article = await _articleRepository.GetArticleWithSnapshots(id);
             return article == null ? NotFound() : Ok(article);
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<ArticleReadDto>>> Search([FromQuery] string search)
+        public async Task<ActionResult> Search([FromQuery] string search)
         {
             var articles = await _articleRepository.SearchArticles(search);
             return Ok(_mapper.Map<IEnumerable<ArticleReadDto>>(articles));
@@ -62,7 +62,7 @@ namespace DotWikiApi.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult<ArticleReadDto>> Post(ArticleCreateDto articleCreateDto)
+        public async Task<ActionResult> Post(ArticleCreateDto articleCreateDto)
         {
             var article = _mapper.Map<Article>(articleCreateDto);
             var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
