@@ -82,6 +82,7 @@ namespace DotWikiApi.Controllers
                 Title = article.Title,
                 Content = article.Content,
                 ArticleId = article.Id,
+                Comment = articleUpdateDto.Comment,
                 CreatedAt = DateTime.Now,
                 ApplicationUserId = usr.Id
             };
