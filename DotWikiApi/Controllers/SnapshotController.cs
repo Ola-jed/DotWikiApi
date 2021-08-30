@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using DotWikiApi.Authentication;
 using DotWikiApi.Data;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;

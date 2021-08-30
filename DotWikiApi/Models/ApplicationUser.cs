@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using DotWikiApi.Models;
 using Microsoft.AspNetCore.Identity;
 
-namespace DotWikiApi.Authentication
+namespace DotWikiApi.Models
 {
     public class ApplicationUser: IdentityUser
     {

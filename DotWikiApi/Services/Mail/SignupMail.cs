@@ -1,4 +1,4 @@
-using DotWikiApi.Authentication;
+using DotWikiApi.Models;
 using Microsoft.Extensions.Options;
 using MimeKit;
 

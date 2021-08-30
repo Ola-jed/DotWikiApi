@@ -1,19 +1,15 @@
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using DotWikiApi.Authentication;
 using DotWikiApi.Dtos;
+using DotWikiApi.Models;
+using DotWikiApi.Services.Auth;
 using DotWikiApi.Services.Mail;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 namespace DotWikiApi.Controllers
 {
@@ -22,22 +18,21 @@ namespace DotWikiApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly IAuthService _authService;
         private readonly IMailService _mailService;
         private readonly IOptions<MailSettings> _options;
 
         public AuthController(UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             IMailService mailService,
-            IOptions<MailSettings> mailSettings)
+            IOptions<MailSettings> mailSettings, IAuthService authService)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _configuration = configuration;
             _mailService = mailService;
             _options = mailSettings;
+            _authService = authService;
         }
 
         [HttpPost]
@@ -84,26 +79,11 @@ namespace DotWikiApi.Controllers
         [Route("login")]
         public async Task<IActionResult> Login(LoginDto model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            var token = await _authService.GenerateJwt(model);
+            if (token == null)
             {
                 return Unauthorized();
             }
-            var userRoles = await _userManager.GetRolesAsync(user);
-            var authClaims = new List<Claim>
-            {
-                new(ClaimTypes.Name, user.UserName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-            authClaims.AddRange(userRoles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JWT:ValidIssuer"],
-                audience:_configuration["JWT:ValidAudience"],
-                expires: DateTime.Now.AddDays(30),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),

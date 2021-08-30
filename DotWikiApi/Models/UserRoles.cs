@@ -1,4 +1,4 @@
-namespace DotWikiApi.Authentication
+namespace DotWikiApi.Models
 {
     public static class UserRoles
     {

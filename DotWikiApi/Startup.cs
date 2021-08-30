@@ -1,7 +1,8 @@
 using System;
 using System.Text;
-using DotWikiApi.Authentication;
 using DotWikiApi.Data;
+using DotWikiApi.Models;
+using DotWikiApi.Services.Auth;
 using DotWikiApi.Services.Mail;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +33,7 @@ namespace DotWikiApi
         {
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<ISnapshotRepository, SnapshotRepository>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddIdentity<ApplicationUser, IdentityRole>()

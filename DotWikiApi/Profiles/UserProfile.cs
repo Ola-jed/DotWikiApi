@@ -1,6 +1,6 @@
 using AutoMapper;
-using DotWikiApi.Authentication;
 using DotWikiApi.Dtos;
+using DotWikiApi.Models;
 
 namespace DotWikiApi.Profiles
 {

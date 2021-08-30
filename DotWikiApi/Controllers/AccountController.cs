@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using AutoMapper;
-using DotWikiApi.Authentication;
 using DotWikiApi.Dtos;
+using DotWikiApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
