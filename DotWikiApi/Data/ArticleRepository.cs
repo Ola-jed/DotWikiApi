@@ -36,6 +36,14 @@ namespace DotWikiApi.Data
                 .FirstOrDefaultAsync(article => article.Id == id);
         }
 
+        public Task<Article> GetArticleWithSnapshots(int id)
+        {
+            return _context
+                .Articles
+                .Include(a => a.Snapshots)
+                .FirstOrDefaultAsync(article => article.Id == id);
+        }
+
         public Task<bool> ArticleExists(int id)
         {
             return _context.Articles.AnyAsync(a => a.Id == id);
