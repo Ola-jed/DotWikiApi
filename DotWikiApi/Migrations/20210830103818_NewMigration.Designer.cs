@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DotWikiApi.Migrations
 {
     [DbContext(typeof(DotWikiContext))]
-    [Migration("20210827204257_UpdatedForeignIdSnaphot")]
-    partial class UpdatedForeignIdSnaphot
+    [Migration("20210830103818_NewMigration")]
+    partial class NewMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -280,28 +280,24 @@ namespace DotWikiApi.Migrations
 
             modelBuilder.Entity("DotWikiApi.Models.Article", b =>
                 {
-                    b.HasOne("DotWikiApi.Authentication.ApplicationUser", "ApplicationUser")
+                    b.HasOne("DotWikiApi.Authentication.ApplicationUser", null)
                         .WithMany("Articles")
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.Navigation("ApplicationUser");
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("DotWikiApi.Models.Snapshot", b =>
                 {
-                    b.HasOne("DotWikiApi.Authentication.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                    b.HasOne("DotWikiApi.Authentication.ApplicationUser", null)
+                        .WithMany("Snapshots")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("DotWikiApi.Models.Article", "Article")
+                    b.HasOne("DotWikiApi.Models.Article", null)
                         .WithMany("Snapshots")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ApplicationUser");
-
-                    b.Navigation("Article");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -358,6 +354,8 @@ namespace DotWikiApi.Migrations
             modelBuilder.Entity("DotWikiApi.Authentication.ApplicationUser", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Snapshots");
                 });
 
             modelBuilder.Entity("DotWikiApi.Models.Article", b =>

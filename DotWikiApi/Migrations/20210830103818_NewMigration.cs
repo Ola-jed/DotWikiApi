@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DotWikiApi.Migrations
 {
-    public partial class FirstMigration : Migration
+    public partial class NewMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -77,18 +77,17 @@ namespace DotWikiApi.Migrations
                     Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ApplicationUserId = table.Column<int>(type: "integer", nullable: false),
-                    ApplicationUserId1 = table.Column<string>(type: "text", nullable: true)
+                    ApplicationUserId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Articles", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Articles_AspNetUsers_ApplicationUserId1",
-                        column: x => x.ApplicationUserId1,
+                        name: "FK_Articles_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -185,8 +184,7 @@ namespace DotWikiApi.Migrations
                     Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
-                    ApplicationUserId = table.Column<int>(type: "integer", nullable: false),
-                    ApplicationUserId1 = table.Column<string>(type: "text", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "text", nullable: true),
                     ArticleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -199,17 +197,17 @@ namespace DotWikiApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Snapshots_AspNetUsers_ApplicationUserId1",
-                        column: x => x.ApplicationUserId1,
+                        name: "FK_Snapshots_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Articles_ApplicationUserId1",
+                name: "IX_Articles_ApplicationUserId",
                 table: "Articles",
-                column: "ApplicationUserId1");
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -249,9 +247,9 @@ namespace DotWikiApi.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Snapshots_ApplicationUserId1",
+                name: "IX_Snapshots_ApplicationUserId",
                 table: "Snapshots",
-                column: "ApplicationUserId1");
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Snapshots_ArticleId",
