@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DotWikiApi.Migrations
 {
     [DbContext(typeof(DotWikiContext))]
-    [Migration("20210830112106_NewMigration")]
-    partial class NewMigration
+    [Migration("20210830124731_UserRegisterDateField")]
+    partial class UserRegisterDateField
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -62,6 +62,9 @@ namespace DotWikiApi.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime>("RegisterDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
