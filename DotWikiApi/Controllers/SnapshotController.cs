@@ -65,6 +65,7 @@ namespace DotWikiApi.Controllers
                 return Forbid();
             }
             _snapshotRepository.DeleteSnapshot(snapshot);
+            await _snapshotRepository.SaveChanges();
             return NoContent();
         }
 
@@ -89,6 +90,7 @@ namespace DotWikiApi.Controllers
                 Title = article.Title,
                 Content = article.Content,
                 ArticleId = article.Id,
+                Comment = "Rollback",
                 ApplicationUserId = currentUser.Id,
                 CreatedAt = DateTime.Now
             };
