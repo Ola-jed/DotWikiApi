@@ -30,6 +30,24 @@ namespace DotWikiApi.Services.Auth
             return user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password);
         }
 
+        public async Task<(IdentityResult, ApplicationUser)> RegisterUser(RegisterDto registerDto)
+        {
+            var userExists = await _userManager.FindByNameAsync(registerDto.Username);
+            if (userExists != null)
+            {
+                return (null, null);
+            }
+            var user = new ApplicationUser()
+            {
+                Email = registerDto.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = registerDto.Username,
+                RegisterDate = DateTime.Now
+            };
+            var result = await _userManager.CreateAsync(user, registerDto.Password);
+            return (result, user);
+        }
+
         public async Task<JwtSecurityToken> GenerateJwt(LoginDto loginDto)
         {
             if (! await ValidateUserCredentials(loginDto))
