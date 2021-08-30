@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
+using DotWikiApi.Authentication;
 using DotWikiApi.Data;
 using DotWikiApi.Dtos;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotWikiApi.Controllers
@@ -14,13 +16,16 @@ namespace DotWikiApi.Controllers
         private readonly ISnapshotRepository _snapshotRepository;
         private readonly IArticleRepository _articleRepository;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public SnapshotController(ISnapshotRepository snapshotRepository,
             IMapper mapper,
-            IArticleRepository articleRepository)
+            IArticleRepository articleRepository,
+            UserManager<ApplicationUser> userManager)
         {
             _snapshotRepository = snapshotRepository;
             _articleRepository = articleRepository;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -32,6 +37,7 @@ namespace DotWikiApi.Controllers
             {
                 return NotFound();
             }
+
             return Ok(_mapper.Map<IEnumerable<SnapshotReadDto>>(await _snapshotRepository.GetSnapshots(id)));
         }
 
@@ -42,6 +48,22 @@ namespace DotWikiApi.Controllers
             return snapshot == null ? NotFound() : Ok(snapshot);
         }
 
-        // TODO : make delete and rollback to a previous snapshot
+        [HttpDelete("Snapshot/{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var snapshot = await _snapshotRepository.GetSnapshot(id);
+            if (snapshot == null)
+            {
+                return NotFound();
+            }
+            if (snapshot.ApplicationUserId != currentUser.Id)
+            {
+                return Forbid();
+            }
+            _snapshotRepository.DeleteSnapshot(snapshot);
+            return NoContent();
+        }
+        // TODO : make Rollback to a previous snapshot
     }
 }
