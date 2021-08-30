@@ -47,13 +47,20 @@ namespace DotWikiApi.Controllers
             return article == null ? NotFound() : Ok(article);
         }
 
+        [HttpGet("{id:int}/WithSnapshot")]
+        public async Task<ActionResult<Article>> GetWithSnapshots(int id)
+        {
+            var article = await _articleRepository.GetArticleWithSnapshots(id);
+            return article == null ? NotFound() : Ok(article);
+        }
+
         [Authorize]
         [HttpPost]
         public async Task<ActionResult<ArticleReadDto>> Post(ArticleCreateDto articleCreateDto)
         {
             var article = _mapper.Map<Article>(articleCreateDto);
             var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
-            article.ApplicationUser = usr;
+            article.ApplicationUserId = usr.Id;
             article.CreatedAt = DateTime.Now;
             await _articleRepository.CreateArticle(article);
             await _articleRepository.SaveChanges();
@@ -76,8 +83,7 @@ namespace DotWikiApi.Controllers
                 Content = article.Content,
                 ArticleId = article.Id,
                 CreatedAt = DateTime.Now,
-                ApplicationUserId = usr.Id,
-                ApplicationUser = usr
+                ApplicationUserId = usr.Id
             };
             await _snapshotRepository.CreateSnapshot(snapshot);
             _mapper.Map(articleUpdateDto, article);
