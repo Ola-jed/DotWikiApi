@@ -26,7 +26,8 @@ namespace DotWikiApi.Controllers
         public AuthController(UserManager<ApplicationUser> userManager,
             IConfiguration configuration,
             IMailService mailService,
-            IOptions<MailSettings> mailSettings, IAuthService authService)
+            IOptions<MailSettings> mailSettings,
+            IAuthService authService)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -37,22 +38,17 @@ namespace DotWikiApi.Controllers
 
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register(RegisterDto model)
+        public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            var userExists = await _userManager.FindByNameAsync(model.Username);
-            if (userExists != null)
+            var registerData = await _authService.RegisterUser(registerDto);
+            if (registerData == (null, null))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { Status = "Error", Message = "User already exists!" });
             }
-            var user = new ApplicationUser()
-            {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username,
-                RegisterDate = DateTime.Now
-            };
-            var result = await _userManager.CreateAsync(user, model.Password);
+
+            var user = registerData.Item2;
+            var result = registerData.Item1;
             try
             {
                 await _mailService.SendEmailAsync(new SignupMail(_options, user));
@@ -84,6 +80,7 @@ namespace DotWikiApi.Controllers
             {
                 return Unauthorized();
             }
+
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
