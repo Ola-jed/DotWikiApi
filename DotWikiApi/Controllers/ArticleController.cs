@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -34,7 +33,7 @@ namespace DotWikiApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable>> GetAll()
+        public async Task<ActionResult<IEnumerable<ArticleReadDto>>> GetAll()
         {
             var articles = _mapper.Map<IEnumerable<ArticleReadDto>>(await _articleRepository.GetAllArticles());
             return Ok(articles);
@@ -52,6 +51,13 @@ namespace DotWikiApi.Controllers
         {
             var article = await _articleRepository.GetArticleWithSnapshots(id);
             return article == null ? NotFound() : Ok(article);
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<ArticleReadDto>>> Search([FromQuery] string search)
+        {
+            var articles = await _articleRepository.SearchArticles(search);
+            return Ok(_mapper.Map<IEnumerable<ArticleReadDto>>(articles));
         }
 
         [Authorize]
@@ -87,6 +93,7 @@ namespace DotWikiApi.Controllers
                 ApplicationUserId = usr.Id
             };
             await _snapshotRepository.CreateSnapshot(snapshot);
+            await _snapshotRepository.SaveChanges();
             _mapper.Map(articleUpdateDto, article);
             _articleRepository.UpdateArticle(article);
             await _articleRepository.SaveChanges();
