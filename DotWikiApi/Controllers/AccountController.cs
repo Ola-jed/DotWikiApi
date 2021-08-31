@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using AutoMapper;
 using DotWikiApi.Dtos;
@@ -54,8 +53,11 @@ namespace DotWikiApi.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(AccountUpdateDto accountUpdateDto)
         {
-            var usr = await _userManager.GetUserAsync(HttpContext.User);
-            Console.WriteLine(usr == null);
+            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            if (usr == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
             var loginDto = new LoginDto() { Username = usr.UserName, Password = accountUpdateDto.Password };
             var validCredentials = await _authService.ValidateUserCredentials(loginDto);
             if (!validCredentials)
@@ -88,7 +90,7 @@ namespace DotWikiApi.Controllers
                 ? NoContent()
                 : StatusCode(StatusCodes.Status500InternalServerError, new
                 {
-                    Errors = res.Errors
+                    res.Errors
                 });
         }
     }
