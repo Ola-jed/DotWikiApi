@@ -1,9 +1,11 @@
+using System;
 using System.Threading.Tasks;
 using AutoMapper;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
 using DotWikiApi.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,19 +54,42 @@ namespace DotWikiApi.Controllers
         [HttpPut]
         public async Task<ActionResult> Put(AccountUpdateDto accountUpdateDto)
         {
-            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var usr = await _userManager.GetUserAsync(HttpContext.User);
+            Console.WriteLine(usr == null);
+            var loginDto = new LoginDto() { Username = usr.UserName, Password = accountUpdateDto.Password };
+            var validCredentials = await _authService.ValidateUserCredentials(loginDto);
+            if (!validCredentials)
+            {
+                return Unauthorized();
+            }
             usr.Email = accountUpdateDto.Email;
             usr.UserName = accountUpdateDto.Username;
-            // TODO : Finish implementation
-            return NoContent();
+            var res = await _userManager.UpdateAsync(usr);
+            return res.Succeeded
+                ? NoContent()
+                : StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    Errors = res.Errors
+                });
         }
 
         [Authorize]
         [HttpDelete]
-        public ActionResult Delete()
+        public async Task<ActionResult> Delete(LoginDto loginDto)
         {
-            // TODO : Finish implementation
-            return NoContent();
+            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var validCredentials = await _authService.ValidateUserCredentials(loginDto);
+            if (!validCredentials || usr == null)
+            {
+                return Unauthorized();
+            }
+            var res = await _userManager.DeleteAsync(usr);
+            return res.Succeeded
+                ? NoContent()
+                : StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    Errors = res.Errors
+                });
         }
     }
 }
