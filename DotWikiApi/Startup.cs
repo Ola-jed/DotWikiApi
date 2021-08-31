@@ -4,6 +4,7 @@ using DotWikiApi.Data;
 using DotWikiApi.Models;
 using DotWikiApi.Services.Auth;
 using DotWikiApi.Services.Mail;
+using DotWikiApi.Services.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +35,7 @@ namespace DotWikiApi
             services.AddScoped<IArticleRepository, ArticleRepository>();
             services.AddScoped<ISnapshotRepository, SnapshotRepository>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IApplicationUserService, ApplicationUserService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -57,7 +59,7 @@ namespace DotWikiApi
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DotWikiApi", Version = "v1" });
                 var securitySchema = new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. (\"Authorization: Bearer {token}\")",
+                    Description = "Authorization header using the Bearer scheme. (\"Authorization: Bearer {token}\")",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
