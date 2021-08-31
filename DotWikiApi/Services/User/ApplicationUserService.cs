@@ -49,9 +49,9 @@ namespace DotWikiApi.Services.User
             return await _userManager.UpdateAsync(initialValue);
         }
 
-        public Task<IdentityResult> DeleteUser(ApplicationUser user)
+        public async Task<IdentityResult> DeleteUser(ApplicationUser user)
         {
-            return _userManager.DeleteAsync(user);
+            return await _userManager.DeleteAsync(user);
         }
 
         public async Task<bool> CheckPassword(string username, string password)
