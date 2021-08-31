@@ -9,6 +9,7 @@ namespace DotWikiApi.Profiles
         public UserProfile()
         {
             CreateMap<ApplicationUser,UserReadDto>();
+            CreateMap<AccountUpdateDto, LoginDto>();
         }
     }
 }
