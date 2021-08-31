@@ -2,13 +2,10 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
 using DotWikiApi.Dtos;
-using DotWikiApi.Models;
 using DotWikiApi.Services.Auth;
 using DotWikiApi.Services.Mail;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace DotWikiApi.Controllers
@@ -17,20 +14,14 @@ namespace DotWikiApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration;
         private readonly IAuthService _authService;
         private readonly IMailService _mailService;
         private readonly IOptions<MailSettings> _options;
 
-        public AuthController(UserManager<ApplicationUser> userManager,
-            IConfiguration configuration,
-            IMailService mailService,
+        public AuthController(IMailService mailService,
             IOptions<MailSettings> mailSettings,
             IAuthService authService)
         {
-            _userManager = userManager;
-            _configuration = configuration;
             _mailService = mailService;
             _options = mailSettings;
             _authService = authService;
@@ -66,7 +57,7 @@ namespace DotWikiApi.Controllers
                     {
                         Status = "Error",
                         Message = "User creation failed! Please check user details and try again.",
-                        Errors = result.Errors
+                        result.Errors
                     })
                 : Ok(new { Status = "Success", Message = "User created successfully!" });
         }

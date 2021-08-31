@@ -5,8 +5,8 @@ using AutoMapper;
 using DotWikiApi.Data;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
+using DotWikiApi.Services.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotWikiApi.Controllers
@@ -18,16 +18,16 @@ namespace DotWikiApi.Controllers
         private readonly ISnapshotRepository _snapshotRepository;
         private readonly IArticleRepository _articleRepository;
         private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IApplicationUserService _userService;
 
         public SnapshotController(ISnapshotRepository snapshotRepository,
             IMapper mapper,
             IArticleRepository articleRepository,
-            UserManager<ApplicationUser> userManager)
+            IApplicationUserService userService)
         {
             _snapshotRepository = snapshotRepository;
             _articleRepository = articleRepository;
-            _userManager = userManager;
+            _userService = userService;
             _mapper = mapper;
         }
 
@@ -58,7 +58,7 @@ namespace DotWikiApi.Controllers
             {
                 return NotFound();
             }
-            var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var currentUser = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
             if (snapshot.ApplicationUserId != currentUser.Id)
             {
                 return Forbid();
@@ -77,7 +77,7 @@ namespace DotWikiApi.Controllers
             {
                 return NotFound();
             }
-            var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var currentUser = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
             if (snapshot.ApplicationUserId != currentUser.Id)
             {
                 return Forbid();

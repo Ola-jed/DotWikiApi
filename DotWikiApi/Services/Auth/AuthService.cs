@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
+using DotWikiApi.Services.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
@@ -15,24 +16,24 @@ namespace DotWikiApi.Services.Auth
 {
     public class AuthService: IAuthService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IApplicationUserService _userService;
         private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public AuthService(IConfiguration configuration, IApplicationUserService userService)
         {
-            _userManager = userManager;
             _configuration = configuration;
+            _userService = userService;
         }
 
         public async Task<bool> ValidateUserCredentials(LoginDto loginDto)
         {
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-            return user != null && await _userManager.CheckPasswordAsync(user, loginDto.Password);
+            var user = await _userService.FindUserByUserName(loginDto.Username);
+            return user != null && await _userService.CheckPassword(loginDto.Username, loginDto.Password);
         }
 
         public async Task<(IdentityResult, ApplicationUser)> RegisterUser(RegisterDto registerDto)
         {
-            var userExists = await _userManager.FindByNameAsync(registerDto.Username);
+            var userExists = await _userService.FindUserByUserName(registerDto.Username);
             if (userExists != null)
             {
                 return (null, null);
@@ -44,7 +45,7 @@ namespace DotWikiApi.Services.Auth
                 UserName = registerDto.Username,
                 RegisterDate = DateTime.Now
             };
-            var result = await _userManager.CreateAsync(user, registerDto.Password);
+            var result = await _userService.CreateUser(user, registerDto.Password);
             return (result, user);
         }
 
@@ -54,8 +55,8 @@ namespace DotWikiApi.Services.Auth
             {
                 return null;
             }
-            var user = await _userManager.FindByNameAsync(loginDto.Username);
-            var userRoles = await _userManager.GetRolesAsync(user);
+            var user = await _userService.FindUserByUserName(loginDto.Username);
+            var userRoles = await _userService.GetUserRoles(user);
             var authClaims = new List<Claim>
             {
                 new(ClaimTypes.Name, user.UserName),

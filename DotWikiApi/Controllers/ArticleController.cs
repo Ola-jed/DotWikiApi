@@ -5,8 +5,8 @@ using AutoMapper;
 using DotWikiApi.Data;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
+using DotWikiApi.Services.User;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DotWikiApi.Controllers
@@ -18,17 +18,17 @@ namespace DotWikiApi.Controllers
         private readonly IArticleRepository _articleRepository;
         private readonly ISnapshotRepository _snapshotRepository;
         private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IApplicationUserService _userService;
 
         public ArticleController(IArticleRepository articleRepository,
             ISnapshotRepository snapshotRepository,
             IMapper mapper,
-            UserManager<ApplicationUser> userManager)
+            IApplicationUserService userService)
         {
             _articleRepository = articleRepository;
             _snapshotRepository = snapshotRepository;
             _mapper = mapper;
-            _userManager = userManager;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -64,12 +64,12 @@ namespace DotWikiApi.Controllers
         public async Task<ActionResult> Post(ArticleCreateDto articleCreateDto)
         {
             var article = _mapper.Map<Article>(articleCreateDto);
-            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+            var usr = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
             article.ApplicationUserId = usr.Id;
             article.CreatedAt = DateTime.Now;
             await _articleRepository.CreateArticle(article);
             await _articleRepository.SaveChanges();
-            return CreatedAtAction(nameof(Get),new {Id = article.Id},_mapper.Map<ArticleReadDto>(article));
+            return CreatedAtAction(nameof(Get), new { article.Id }, _mapper.Map<ArticleReadDto>(article));
         }
 
         [Authorize]
@@ -81,7 +81,8 @@ namespace DotWikiApi.Controllers
             {
                 return NotFound();
             }
-            var usr = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+
+            var usr = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
             var snapshot = new Snapshot
             {
                 Title = article.Title,
@@ -108,11 +109,13 @@ namespace DotWikiApi.Controllers
             {
                 return NotFound();
             }
-            var currentUser = await _userManager.FindByNameAsync(HttpContext.User.Identity?.Name);
+
+            var currentUser = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
             if (article.ApplicationUserId != currentUser.Id)
             {
                 return Forbid();
             }
+
             _articleRepository.DeleteArticle(article);
             await _articleRepository.SaveChanges();
             return NoContent();
