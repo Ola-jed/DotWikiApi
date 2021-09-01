@@ -25,6 +25,7 @@ namespace DotWikiApi.Data
             return await _context
                 .Snapshots
                 .Where(s => s.ArticleId == articleId)
+                .AsNoTracking()
                 .ToListAsync();
         }
 

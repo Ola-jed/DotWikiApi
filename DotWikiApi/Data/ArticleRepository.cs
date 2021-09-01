@@ -18,7 +18,10 @@ namespace DotWikiApi.Data
 
         public async Task<IEnumerable<Article>> GetAllArticles()
         {
-            return await _context.Articles.ToListAsync();
+            return await _context
+                .Articles
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<List<Article>> SearchArticles(string title)
@@ -26,6 +29,7 @@ namespace DotWikiApi.Data
             return await _context
                 .Articles
                 .Where(article => article.Title.ToLower().Contains(title.ToLower()))
+                .AsNoTracking()
                 .ToListAsync();
         }
 
