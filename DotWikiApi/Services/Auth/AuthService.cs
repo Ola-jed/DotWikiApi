@@ -38,7 +38,7 @@ namespace DotWikiApi.Services.Auth
             {
                 return (null, null);
             }
-            var user = new ApplicationUser()
+            var user = new ApplicationUser
             {
                 Email = registerDto.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),

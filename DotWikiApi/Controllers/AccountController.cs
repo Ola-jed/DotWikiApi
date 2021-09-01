@@ -51,7 +51,7 @@ namespace DotWikiApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            var loginDto = new LoginDto() { Username = usr.UserName, Password = accountUpdateDto.Password };
+            var loginDto = new LoginDto { Username = usr.UserName, Password = accountUpdateDto.Password };
             var validCredentials = await _authService.ValidateUserCredentials(loginDto);
             if (!validCredentials)
             {
@@ -63,7 +63,7 @@ namespace DotWikiApi.Controllers
                 ? NoContent()
                 : StatusCode(StatusCodes.Status500InternalServerError, new
                 {
-                    Errors = res.Errors
+                    res.Errors
                 });
         }
 
