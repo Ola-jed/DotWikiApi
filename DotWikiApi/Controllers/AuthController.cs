@@ -31,15 +31,13 @@ namespace DotWikiApi.Controllers
         [Route("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
-            var registerData = await _authService.RegisterUser(registerDto);
-            if (registerData == (null, null))
+            var (result, user) = await _authService.RegisterUser(registerDto);
+            if ((result,user) == (null, null))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { Status = "Error", Message = "User already exists!" });
             }
 
-            var user = registerData.Item2;
-            var result = registerData.Item1;
             try
             {
                 await _mailService.SendEmailAsync(new SignupMail(_options, user));
