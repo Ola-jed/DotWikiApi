@@ -1,9 +1,8 @@
 using MimeKit;
 
-namespace DotWikiApi.Services.Mail
+namespace DotWikiApi.Services.Mail;
+
+public interface IMailable
 {
-    public interface IMailable
-    {
-        MimeMessage Build();
-    }
+    MimeMessage Build();
 }

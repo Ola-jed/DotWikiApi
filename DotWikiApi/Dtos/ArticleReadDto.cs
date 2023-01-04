@@ -1,23 +1,14 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DotWikiApi.Dtos
+namespace DotWikiApi.Dtos;
+
+public record ArticleReadDto
 {
-    public record ArticleReadDto
-    {
-        [Key]
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        [MaxLength(100)]
-        public string Title { get; set; }
+    public string Title { get; set; } = null!;
 
-        [Required]
-        [Column(TypeName = "text")]
-        public string Content { get; set; }
+    public string Content { get; set; } = null!;
 
-        [Required]
-        public DateTime CreatedAt { get; set; }
-    }
+    public DateTime CreatedAt { get; set; }
 }

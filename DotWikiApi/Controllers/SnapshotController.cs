@@ -2,104 +2,116 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
-using DotWikiApi.Data;
+using DotWikiApi.Data.Contracts;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
 using DotWikiApi.Services.User;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DotWikiApi.Controllers
+namespace DotWikiApi.Controllers;
+
+[Route("api/")]
+[ApiController]
+public class SnapshotController : ControllerBase
 {
-    [Route("api/")]
-    [ApiController]
-    public class SnapshotController : ControllerBase
+    private readonly ISnapshotRepository _snapshotRepository;
+    private readonly IArticleRepository _articleRepository;
+    private readonly IMapper _mapper;
+    private readonly IApplicationUserService _userService;
+
+    public SnapshotController(ISnapshotRepository snapshotRepository,
+        IMapper mapper,
+        IArticleRepository articleRepository,
+        IApplicationUserService userService)
     {
-        private readonly ISnapshotRepository _snapshotRepository;
-        private readonly IArticleRepository _articleRepository;
-        private readonly IMapper _mapper;
-        private readonly IApplicationUserService _userService;
+        _snapshotRepository = snapshotRepository;
+        _articleRepository = articleRepository;
+        _userService = userService;
+        _mapper = mapper;
+    }
 
-        public SnapshotController(ISnapshotRepository snapshotRepository,
-            IMapper mapper,
-            IArticleRepository articleRepository,
-            IApplicationUserService userService)
+    [HttpGet("Article/{id:int}/Snapshot")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<SnapshotReadDto>>> GetSnapshots(int id)
+    {
+        var articleExists = await _articleRepository.ArticleExists(id);
+        if (!articleExists)
         {
-            _snapshotRepository = snapshotRepository;
-            _articleRepository = articleRepository;
-            _userService = userService;
-            _mapper = mapper;
+            return NotFound();
         }
+        
+        return Ok(_mapper.Map<IEnumerable<SnapshotReadDto>>(await _snapshotRepository.GetSnapshots(id)));
+    }
 
-        [HttpGet("Article/{id:int}/Snapshot")]
-        public async Task<ActionResult> GetSnapshots(int id)
-        {
-            var articleExists = await _articleRepository.ArticleExists(id);
-            if (!articleExists)
-            {
-                return NotFound();
-            }
-            return Ok(_mapper.Map<IEnumerable<SnapshotReadDto>>(await _snapshotRepository.GetSnapshots(id)));
-        }
+    [HttpGet("Snapshot/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<Snapshot>> Get(int id)
+    {
+        var snapshot = await _snapshotRepository.GetSnapshot(id);
+        return snapshot == null ? NotFound() : Ok(snapshot);
+    }
 
-        [HttpGet("Snapshot/{id:int}")]
-        public async Task<ActionResult> Get(int id)
+    [Authorize]
+    [HttpDelete("Snapshot/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> Delete(int id)
+    {
+        var snapshot = await _snapshotRepository.GetSnapshot(id);
+        if (snapshot == null)
         {
-            var snapshot = await _snapshotRepository.GetSnapshot(id);
-            return snapshot == null ? NotFound() : Ok(snapshot);
+            return NotFound();
         }
+        
+        var currentUser = (await _userService.FindUserByUserName(HttpContext.User.Identity?.Name!))!;
+        if (snapshot.ApplicationUserId != currentUser.Id)
+        {
+            return Forbid();
+        }
+        
+        _snapshotRepository.DeleteSnapshot(snapshot);
+        await _snapshotRepository.SaveChanges();
+        return NoContent();
+    }
 
-        [Authorize]
-        [HttpDelete("Snapshot/{id:int}")]
-        public async Task<ActionResult> Delete(int id)
+    [Authorize]
+    [HttpPost("Snapshot/{id:int}/Rollback")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RollbackTo(int id)
+    {
+        var snapshot = await _snapshotRepository.GetSnapshot(id);
+        if (snapshot == null)
         {
-            var snapshot = await _snapshotRepository.GetSnapshot(id);
-            if (snapshot == null)
-            {
-                return NotFound();
-            }
-            var currentUser = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
-            if (snapshot.ApplicationUserId != currentUser.Id)
-            {
-                return Forbid();
-            }
-            _snapshotRepository.DeleteSnapshot(snapshot);
-            await _snapshotRepository.SaveChanges();
-            return NoContent();
+            return NotFound();
         }
-
-        [Authorize]
-        [HttpPost("Snapshot/{id:int}/Rollback")]
-        public async Task<ActionResult> RollbackTo(int id)
+        
+        var currentUser = (await _userService.FindUserByUserName(HttpContext.User.Identity?.Name!))!;
+        if (snapshot.ApplicationUserId != currentUser.Id)
         {
-            var snapshot = await _snapshotRepository.GetSnapshot(id);
-            if (snapshot == null)
-            {
-                return NotFound();
-            }
-            var currentUser = await _userService.FindUserByUserName(HttpContext.User.Identity?.Name);
-            if (snapshot.ApplicationUserId != currentUser.Id)
-            {
-                return Forbid();
-            }
-            var article = await _articleRepository.GetArticle(snapshot.ArticleId);
-            // Create a snapshot for this state
-            var newSnapshot = new Snapshot
-            {
-                Title = article.Title,
-                Content = article.Content,
-                ArticleId = article.Id,
-                Comment = "Rollback",
-                ApplicationUserId = currentUser.Id,
-                CreatedAt = DateTime.Now
-            };
-            await _snapshotRepository.CreateSnapshot(newSnapshot);
-            await _snapshotRepository.SaveChanges();
-            // Update the article with the selected snapshot data
-            article.Content = snapshot.Content;
-            _articleRepository.UpdateArticle(article);
-            await _articleRepository.SaveChanges();
-            return NoContent();
+            return Forbid();
         }
+        var article = (await _articleRepository.GetArticle(snapshot.ArticleId))!;
+        
+        await _snapshotRepository.CreateSnapshot(new Snapshot
+        {
+            Title = article.Title,
+            Content = article.Content,
+            ArticleId = article.Id,
+            Comment = "Rollback",
+            ApplicationUserId = currentUser.Id,
+            CreatedAt = DateTime.Now
+        });
+        await _snapshotRepository.SaveChanges();
+        article.Content = snapshot.Content;
+        _articleRepository.UpdateArticle(article);
+        await _articleRepository.SaveChanges();
+        return NoContent();
     }
 }

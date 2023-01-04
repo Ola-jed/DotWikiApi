@@ -1,26 +1,18 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DotWikiApi.Dtos
+namespace DotWikiApi.Dtos;
+
+public record SnapshotReadDto
 {
-    public record SnapshotReadDto
-    {
-        [Required]
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        [Required]
-        public string Title { get; set; }
+    public string Title { get; set; } = null!;
 
-        [Required]
-        [Column(TypeName = "text")]
-        public string Content { get; set; }
+    public string Content { get; set; } = null!;
 
-        [Required]
-        public string Comment { get; set; }
+    public string Comment { get; set; } = null!;
 
-        [Required]
-        public DateTime CreatedAt { get; set; }
-        public int ArticleId { get; set; }
-    }
+    public DateTime CreatedAt { get; set; }
+    
+    public int ArticleId { get; set; }
 }

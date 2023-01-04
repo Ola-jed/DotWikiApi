@@ -6,75 +6,69 @@ using DotWikiApi.Services.Auth;
 using DotWikiApi.Services.Mail;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotWikiApi.Controllers
+namespace DotWikiApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class AuthController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    private readonly IAuthService _authService;
+    private readonly IMailService _mailService;
+    private readonly IOptions<MailSettings> _options;
+    private readonly ILogger<AuthController> _logger;
+
+    public AuthController(IMailService mailService,
+        IOptions<MailSettings> mailSettings,
+        IAuthService authService,
+        ILogger<AuthController> logger)
     {
-        private readonly IAuthService _authService;
-        private readonly IMailService _mailService;
-        private readonly IOptions<MailSettings> _options;
+        _mailService = mailService;
+        _options = mailSettings;
+        _authService = authService;
+        _logger = logger;
+    }
 
-        public AuthController(IMailService mailService,
-            IOptions<MailSettings> mailSettings,
-            IAuthService authService)
+    [HttpPost]
+    [Route("register")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Register(RegisterDto registerDto)
+    {
+        var (result, user) = await _authService.RegisterUser(registerDto);
+        if ((result,user) == (null, null))
         {
-            _mailService = mailService;
-            _options = mailSettings;
-            _authService = authService;
+            return BadRequest(new { Message = "User already exists" });
         }
 
-        [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register(RegisterDto registerDto)
+        try
         {
-            var (result, user) = await _authService.RegisterUser(registerDto);
-            if ((result,user) == (null, null))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { Status = "Error", Message = "User already exists!" });
-            }
-
-            try
-            {
-                await _mailService.SendEmailAsync(new SignupMail(_options, user));
-            }
-            catch (Exception e)
-            {
-                Console.BackgroundColor = ConsoleColor.DarkGray;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Message);
-            }
-
-            return !result.Succeeded
-                ? StatusCode(StatusCodes.Status500InternalServerError,
-                    new
-                    {
-                        Status = "Error",
-                        Message = "User creation failed! Please check user details and try again.",
-                        result.Errors
-                    })
-                : Ok(new { Status = "Success", Message = "User created successfully!" });
+            await _mailService.SendEmailAsync(new SignupMail(_options, user));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{}",e.Message);
         }
 
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login(LoginDto model)
-        {
-            var token = await _authService.GenerateJwt(model);
-            if (token == null)
-            {
-                return Unauthorized();
-            }
+        return !result.Succeeded
+            ? BadRequest(new { result.Errors })
+            : Ok();
+    }
 
-            return Ok(new
-            {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
-            });
+    [HttpPost]
+    [Route("login")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(TokenDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<TokenDto>> Login(LoginDto model)
+    {
+        var token = await _authService.GenerateJwt(model);
+        if (token == null)
+        {
+            return Unauthorized();
         }
+
+        return new TokenDto(new JwtSecurityTokenHandler().WriteToken(token), token.ValidTo);
     }
 }

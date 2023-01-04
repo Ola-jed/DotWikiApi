@@ -2,15 +2,14 @@ using AutoMapper;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
 
-namespace DotWikiApi.Profiles
+namespace DotWikiApi.Profiles;
+
+public class ArticleProfile: Profile
 {
-    public class ArticleProfile: Profile
+    public ArticleProfile()
     {
-        public ArticleProfile()
-        {
-            CreateMap<ArticleCreateDto,Article>();
-            CreateMap<ArticleUpdateDto,Article>();
-            CreateMap<Article,ArticleReadDto>();
-        }
+        CreateMap<ArticleCreateDto,Article>();
+        CreateMap<ArticleUpdateDto,Article>();
+        CreateMap<Article,ArticleReadDto>();
     }
 }

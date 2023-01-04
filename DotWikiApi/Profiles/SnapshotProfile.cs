@@ -2,13 +2,12 @@ using AutoMapper;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
 
-namespace DotWikiApi.Profiles
+namespace DotWikiApi.Profiles;
+
+public class SnapshotProfile: Profile
 {
-    public class SnapshotProfile: Profile
+    public SnapshotProfile()
     {
-        public SnapshotProfile()
-        {
-            CreateMap<Snapshot,SnapshotReadDto>();
-        }
+        CreateMap<Snapshot,SnapshotReadDto>();
     }
 }
