@@ -1,11 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using DotWikiApi.Data.Contracts;
 using DotWikiApi.Dtos;
 using DotWikiApi.Models;
 using DotWikiApi.Services.User;
+using FluentPaginator.Lib.Extensions;
+using FluentPaginator.Lib.Page;
+using FluentPaginator.Lib.Parameter;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +16,14 @@ namespace DotWikiApi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ArticleController : ControllerBase
+public class ArticlesController : ControllerBase
 {
     private readonly IArticleRepository _articleRepository;
     private readonly ISnapshotRepository _snapshotRepository;
     private readonly IMapper _mapper;
     private readonly IApplicationUserService _userService;
 
-    public ArticleController(IArticleRepository articleRepository,
+    public ArticlesController(IArticleRepository articleRepository,
         ISnapshotRepository snapshotRepository,
         IMapper mapper,
         IApplicationUserService userService)
@@ -33,9 +35,11 @@ public class ArticleController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<ArticleReadDto>> GetAll()
+    public async Task<Page<ArticleReadDto>> GetAll([FromQuery] ArticleFilterDto articleFilterDto)
     {
-        return _mapper.Map<IEnumerable<ArticleReadDto>>(await _articleRepository.GetAllArticles());
+        var paginationParameter = new PaginationParameter(articleFilterDto.PageSize, articleFilterDto.PageNumber);
+        var articles = await _articleRepository.GetArticles(paginationParameter, articleFilterDto.Search);
+        return articles.Map(x => _mapper.Map<ArticleReadDto>(x));
     }
 
     [HttpGet("{id:int}", Name = "Get")]
@@ -50,13 +54,6 @@ public class ArticleController : ControllerBase
     {
         var article = await _articleRepository.GetArticleWithSnapshots(id);
         return article == null ? NotFound() : article;
-    }
-
-    [HttpGet("Search")]
-    public async Task<IEnumerable<ArticleReadDto>> Search([FromQuery] string search)
-    {
-        var articles = await _articleRepository.SearchArticles(search);
-        return _mapper.Map<IEnumerable<ArticleReadDto>>(articles);
     }
 
     [Authorize]

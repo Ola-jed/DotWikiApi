@@ -1,8 +1,10 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DotWikiApi.Data.Contracts;
 using DotWikiApi.Models;
+using FluentPaginator.Lib.Extensions;
+using FluentPaginator.Lib.Page;
+using FluentPaginator.Lib.Parameter;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotWikiApi.Data;
@@ -16,21 +18,15 @@ public class ArticleRepository: IArticleRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Article>> GetAllArticles()
+    public async Task<Page<Article>> GetArticles(PaginationParameter paginationParameter, string? search = null)
     {
-        return await _context
-            .Articles
-            .AsNoTracking()
-            .ToListAsync();
-    }
+        var query = _context.Articles.AsNoTracking();
+        if (search != null)
+        {
+            query = query.Where(x => EF.Functions.Like(x.Title, $"%{search}%"));
+        }
 
-    public async Task<List<Article>> SearchArticles(string title)
-    {
-        return await _context
-            .Articles
-            .Where(article => article.Title.ToLower().Contains(title.ToLower()))
-            .AsNoTracking()
-            .ToListAsync();
+        return await Task.Run(() => query.Paginate(paginationParameter, x => x.CreatedAt));
     }
 
     public Task<Article?> GetArticle(int id)

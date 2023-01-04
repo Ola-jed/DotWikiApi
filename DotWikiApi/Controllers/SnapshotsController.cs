@@ -14,14 +14,14 @@ namespace DotWikiApi.Controllers;
 
 [Route("api/")]
 [ApiController]
-public class SnapshotController : ControllerBase
+public class SnapshotsController : ControllerBase
 {
     private readonly ISnapshotRepository _snapshotRepository;
     private readonly IArticleRepository _articleRepository;
     private readonly IMapper _mapper;
     private readonly IApplicationUserService _userService;
 
-    public SnapshotController(ISnapshotRepository snapshotRepository,
+    public SnapshotsController(ISnapshotRepository snapshotRepository,
         IMapper mapper,
         IArticleRepository articleRepository,
         IApplicationUserService userService)
